@@ -1,70 +1,84 @@
-// Videojuego Con Raylib.cpp : Este archivo contiene la función "main". La ejecución del programa comienza y termina ahí.
-//
-
+// Videojuego Con Raylib.cpp
 #include <iostream>
 #include <raylib.h>
+
+
 using namespace std;
 
 //Window default
 Color backgroundColor = { 20,16,75,255 };
-int windowWidth = 800;
-int windowHeight = 500;
+int windowWidth = 900;
+int windowHeight = 1000;
 
-//Player default
-
-struct Player{
+//Player
+class Player{
+private:
     Vector2 position;
     Vector2 size;
     float speed;
+public:
+    Player(Vector2, Vector2,float);//Constructor
+    void movimiento();
+    int dibujar();
 };
-Player player1 = { 
-                    {400,225},
-                    {40,40}, 
-                    5.0f
-                };
 
-void movimiento() {
-    float deltaTime = GetFrameTime();
-
-    if (IsKeyDown(KEY_RIGHT)) player1.position.x += player1.speed ;
-    if (IsKeyDown(KEY_LEFT))  player1.position.x -= player1.speed ;
-    if (IsKeyDown(KEY_UP))    player1.position.y -= player1.speed ;
-    if (IsKeyDown(KEY_DOWN))  player1.position.y += player1.speed ;
-
+Player::Player(Vector2 _position, Vector2 _size, float _speed) {
+    position = _position;
+    size = _size;
+    speed = _speed;
 }
 
-int dibujar() {
-    DrawRectangleV(player1.position, player1.size, WHITE);
+void Player::movimiento() {
+    float deltaTime = GetFrameTime();
+
+    if (IsKeyDown(KEY_RIGHT)) position.x += speed * deltaTime;
+    if (IsKeyDown(KEY_LEFT))  position.x -= speed * deltaTime;
+    if (IsKeyDown(KEY_UP))    position.y -= speed * deltaTime;
+    if (IsKeyDown(KEY_DOWN))  position.y += speed * deltaTime;
+}
+
+int Player::dibujar() {
+    DrawRectangleV(position, size, GRAY);
     return 0;
 }
 
-int ventana() {
+//Block
+class Block {
+private:
+    Vector2 position;
+    Vector2 size;
+    Color color;
+public:
+    Block(Vector2, Vector2, Color);//Constructor
+    int mapa();
+};
+
+int Block::mapa() {
+    int laberinto[25][25];
+
+
+    return 0;
+}
+
+
+int main(){
+    Player p1 = Player({ 400,225 }, { 40,40 }, 200.0f);
     InitWindow(windowHeight, windowWidth, "MazeRunner");
+    SetTargetFPS(60);
+
     while (!WindowShouldClose()) {
         BeginDrawing();
 
         ClearBackground(backgroundColor);
         DrawText("Ventana Videojuego!", 200, 200, 30, LIGHTGRAY);
 
-        
-        dibujar();
-        movimiento();
+
+        p1.dibujar();
+        p1.movimiento();
 
         EndDrawing();
     }
     CloseWindow();
-    return 0;
-}
-
-int mapa() {
-    int laberinto[25][25];
-    return 0;
-}
-
-
-int main()
-{
-    ventana();
 }
 
 // Ejecutar programa: Ctrl + F5 o menú Depurar > Iniciar sin depurar
