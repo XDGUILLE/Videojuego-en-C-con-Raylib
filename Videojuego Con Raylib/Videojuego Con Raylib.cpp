@@ -43,23 +43,25 @@ int Player::dibujar() {
 }
 
 //Block
-class Block {
-private:
-    Vector2 position;
-    Vector2 size;
-    Color color;
-public:
-    Block(Vector2, Vector2, Color);//Constructor
-    int mapa();
-};
-
-int Block::mapa() {
-    int laberinto[25][25];
-
-
+int mapa() {
+    const int blockSize = 40;
+    // Mapa del laberinto: # = Pared. = Camino
+    char map[10][10] = {
+        "##########""#........#""#.######.#""#.#....#.#""#.#.##.#.#""#.#.##...#""#.######.#""#........#""##########"
+    };
+    // Dibujar el laberinto
+    for (int y = 0; y < 10; y++) {
+        for (int x = 0; x < 10; x++) {
+            if (map[y][x] == '#') {
+                // Dibuja la pared (bloque)
+                DrawRectangle(x * blockSize, y * blockSize, blockSize, blockSize, DARKBLUE);
+                // Opcional: dibujar borde del bloque
+                DrawRectangleLines(x * blockSize, y * blockSize, blockSize, blockSize, BLACK);
+            }
+        }
+    }
     return 0;
 }
-
 
 int main(){
     Player p1 = Player({ 400,225 }, { 40,40 }, 200.0f);
