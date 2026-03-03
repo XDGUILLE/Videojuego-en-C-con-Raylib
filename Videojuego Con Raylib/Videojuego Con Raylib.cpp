@@ -2,11 +2,13 @@
 #include <iostream>
 #include <raylib.h>
 
+//GetRandomValue(0,1) es como usar rand() %
+
 using namespace std;
 
-int blockSize = 30;
+//int blockSize = 30;
 int maze[50][75];
-Rectangle block = Rectangle{500,500,80,80}; // .x, .y, .width, .height
+Rectangle block = Rectangle{ 500,500,80,80 }; // .x, .y, .width, .height
 
 //Window default
 Color backgroundColor = { 20,16,75,255 };
@@ -42,20 +44,31 @@ public:
         if (position.y - size.x < 0) position.y = 0 + size.x;
         if (position.y + size.x > windowHeight) position.y = windowHeight - size.x;
     }
+    void SetSpeed(float newSpeed) { //Para modificar el private
+        speed = newSpeed;
+    }
+
+    float GetSpeed() const { //Para imprimir el private
+        return speed;
+    }
+
     int dibujarP1() {
         DrawRectangleV(position, size, GRAY);
         return 0;
     }
-    Rectangle GetRect() {
+    Rectangle GetRect() {  //Esto es una funcion propia
         return Rectangle{ position.x, position.y, size.x, size.y };
     }
-    void DrawHitbox(bool isColliding) {
+    void DrawHitbox(bool isColliding, Player& Player) { //Player& Player para pasar por referencia speed
         if (isColliding) {
             DrawRectangleLinesEx(GetRect(), 3, RED);
-        }   
+
+
+        }
     }
 };
 
+/*
 void array2D() {
 
     for (int y = 0; y < blockSize; y++) {
@@ -65,14 +78,15 @@ void array2D() {
                 maze[y][x] = 1;
             }
             // Paredes Aleatorias
-
             else if (x % 4 == 0 && y % 4 == 0) {
                 maze[y][x] = 1;
             }
         }
     }
 }
+*/
 
+/*
 void printArray2D() {
     for (int y = 0; y < 50; y++) {
         for (int x = 0; x < 50; x++) {
@@ -85,6 +99,7 @@ void printArray2D() {
         }
     }
 }
+*/
 
 /*
 int mapa() {
@@ -95,7 +110,8 @@ int mapa() {
 }
 */
 
-int main(){
+int main() {
+    srand(time(0));
 
     Player p1 = Player({ 400,225 }, { 20,20 }, 200.0f);
 
@@ -110,12 +126,12 @@ int main(){
         p1.movimiento();
         DrawRectangleLinesEx(block, 15, GREEN);
         p1.dibujarP1();
-        p1.DrawHitbox(isColliding);
+        p1.DrawHitbox(isColliding, 100);
 
-        array2D();
-        printArray2D();
-        
-        
+        //array2D();
+        //printArray2D();
+
+
 
         EndDrawing();
     }
