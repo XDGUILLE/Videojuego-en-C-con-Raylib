@@ -1,4 +1,3 @@
-// Videojuego Con Raylib.cpp
 #include <iostream>
 #include <raylib.h>
 
@@ -14,6 +13,7 @@ Rectangle block = Rectangle{ 500,500,80,80 }; // .x, .y, .width, .height
 Color backgroundColor = { 20,16,75,255 };
 int windowWidth = 950;
 int windowHeight = 1500;
+Vector2 oldPosition;
 
 //Player
 class Player {
@@ -22,13 +22,14 @@ private:
     Vector2 size;
     float speed;
 public:
-    Player(Vector2 position, Vector2 size, float speed) {
+    Player(Vector2 position, Vector2 size, float speed) {//Constructor
         this->position = position;
         this->size = size;
-        this->speed = speed;//Constructor
+        this->speed = speed;
     }
     void movimiento() {
         float deltaTime = GetFrameTime();
+        oldPosition = position; //Guardo la ultima posicion por si hay colision
 
         if (IsKeyDown(KEY_RIGHT)) position.x += speed * deltaTime;
         if (IsKeyDown(KEY_LEFT))  position.x -= speed * deltaTime;
@@ -44,13 +45,19 @@ public:
         if (position.y - size.x < 0) position.y = 0 + size.x;
         if (position.y + size.x > windowHeight) position.y = windowHeight - size.x;
     }
-    void SetSpeed(float newSpeed) { //Para modificar el private
-        speed = newSpeed;
+    
+    void revertPosition() {
+        position = oldPosition;
     }
 
-    float GetSpeed() const { //Para imprimir el private
-        return speed;
+    //tambien se puede usar esta funcion y asi no usar un if en el main
+    /*
+    void CheckCollision(Rectangle wall) {
+        if (CheckCollisionRecs(GetRect(), wall)) {
+            position = oldPosition;
+        }
     }
+    */
 
     int dibujarP1() {
         DrawRectangleV(position, size, GRAY);
@@ -59,11 +66,9 @@ public:
     Rectangle GetRect() {  //Esto es una funcion propia
         return Rectangle{ position.x, position.y, size.x, size.y };
     }
-    void DrawHitbox(bool isColliding, Player& Player) { //Player& Player para pasar por referencia speed
+    void DrawHitbox(bool isColliding) {
         if (isColliding) {
             DrawRectangleLinesEx(GetRect(), 3, RED);
-
-
         }
     }
 };
@@ -113,7 +118,7 @@ int mapa() {
 int main() {
     srand(time(0));
 
-    Player p1 = Player({ 400,225 }, { 20,20 }, 200.0f);
+    Player p1 = Player({ 400,225 }, { 50,50 }, 200.0f);
 
     InitWindow(windowHeight, windowWidth, "MazeRunner");
     SetTargetFPS(60);
@@ -122,11 +127,15 @@ int main() {
         BeginDrawing();
         ClearBackground(backgroundColor);
 
-        bool isColliding = CheckCollisionRecs(p1.GetRect(), block);
-        p1.movimiento();
         DrawRectangleLinesEx(block, 15, GREEN);
+
+        p1.movimiento();
+        bool isColliding = CheckCollisionRecs(p1.GetRect(), block);
+        if (isColliding) {
+            p1.revertPosition();
+        }
         p1.dibujarP1();
-        p1.DrawHitbox(isColliding, 100);
+        p1.DrawHitbox(isColliding);
 
         //array2D();
         //printArray2D();
@@ -137,13 +146,3 @@ int main() {
     }
     CloseWindow();
 }
-
-// Ejecutar programa: Ctrl + F5 o menú Depurar > Iniciar sin depurar
-// Depurar programa: F5 o menú Depurar > Iniciar depuración
-
-// Sugerencias para primeros pasos: 1. Use la ventana del Explorador de soluciones para agregar y administrar archivos
-//   2. Use la ventana de Team Explorer para conectar con el control de código fuente
-//   3. Use la ventana de salida para ver la salida de compilación y otros mensajes
-//   4. Use la ventana Lista de errores para ver los errores
-//   5. Vaya a Proyecto > Agregar nuevo elemento para crear nuevos archivos de código, o a Proyecto > Agregar elemento existente para agregar archivos de código existentes al proyecto
-//   6. En el futuro, para volver a abrir este proyecto, vaya a Archivo > Abrir > Proyecto y seleccione el archivo .sln
