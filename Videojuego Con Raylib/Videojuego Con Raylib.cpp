@@ -5,9 +5,8 @@
 
 using namespace std;
 
-//int blockSize = 30;
 int maze[50][75];
-Rectangle block = Rectangle{ 500,500,80,80 }; // .x, .y, .width, .height
+Rectangle block{ 500,500,50,50 }; // .x, .y, .width, .height
 
 //Window default
 Color backgroundColor = { 20,16,75,255 };
@@ -68,18 +67,17 @@ public:
     }
     void DrawHitbox(bool isColliding) {
         if (isColliding) {
-            DrawRectangleLinesEx(GetRect(), 3, RED);
+            DrawRectangleLinesEx(GetRect(), 4, RED);
         }
     }
 };
 
-/*
-void array2D() {
+void array2D() { //Creacion de la estructura del mapa
 
-    for (int y = 0; y < blockSize; y++) {
-        for (int x = 0; x < blockSize; x++) {
+    for (int y = 0; y < block.width; y++) {
+        for (int x = 0; x < block.width; x++) {
             // Bordes
-            if (y == 0 || y == blockSize - 1 || x == 0 || x == blockSize - 1) {
+            if (y == 0 || y == block.width - 1 || x == 0 || x == block.width - 1) {
                 maze[y][x] = 1;
             }
             // Paredes Aleatorias
@@ -89,22 +87,19 @@ void array2D() {
         }
     }
 }
-*/
 
-/*
 void printArray2D() {
     for (int y = 0; y < 50; y++) {
         for (int x = 0; x < 50; x++) {
             if (maze[y][x] == 1) {
                 // Posicion * tamano
-                DrawRectangle(x * blockSize, y * blockSize, blockSize, blockSize, RED);
+                DrawRectangle(block.x, block.y, block.width, block.width, RED);
                 // Bordes
-                DrawRectangleLines(x * blockSize, y * blockSize, blockSize, blockSize, BLUE);
+                DrawRectangleLinesEx(block, 5, BLUE);
             }
         }
     }
 }
-*/
 
 /*
 int mapa() {
@@ -119,6 +114,7 @@ int main() {
     srand(time(0));
 
     Player p1 = Player({ 400,225 }, { 50,50 }, 200.0f);
+    array2D();
 
     InitWindow(windowHeight, windowWidth, "MazeRunner");
     SetTargetFPS(60);
@@ -127,7 +123,8 @@ int main() {
         BeginDrawing();
         ClearBackground(backgroundColor);
 
-        DrawRectangleLinesEx(block, 15, GREEN);
+        //DrawRectangleLinesEx(block, 15, GREEN);
+        printArray2D();
 
         p1.movimiento();
         bool isColliding = CheckCollisionRecs(p1.GetRect(), block);
