@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Videojuego Con Raylib/Videojuego Con Raylib.vcxproj" Id="af01beff-d456-4802-ab1b-eb50eca6b0bf" />
+</Solution>
