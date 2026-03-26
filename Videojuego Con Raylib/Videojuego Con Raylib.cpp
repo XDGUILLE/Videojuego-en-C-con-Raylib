@@ -4,17 +4,17 @@
 
 using namespace std;
 
-const int filas = 36;
+const int filas = 37;
 const int columnas = 28;
 int maze[filas][columnas] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1},
-    {1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
     {1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,0,0,1,1},
     {1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
     {1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1},
     {1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1},
     {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
@@ -37,13 +37,24 @@ int maze[filas][columnas] = {
     {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
     {1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1},
     {1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1},
-    {1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
     {1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,0,0,1,1},
     {1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
     {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
+
+void inicializarComida() {
+    for (int y = 0; y < filas; y++) {
+        for (int x = 0; x < columnas; x++) {
+            if (maze[y][x] == 0) {
+                maze[y][x] = 2;
+            }
+        }
+    }
+}
 
 float blockSize = 20;
 Rectangle block{ 0, 0, blockSize, blockSize };
@@ -172,21 +183,17 @@ class Item {
 private:
     Vector2 position;
     Vector2 size;
-    int points;
     Color color;
     bool collected;
 public:
-    Item(Vector2 position, Vector2 size, int points, Color color) {
+    Item(Vector2 position, Vector2 size, Color color) {
         this->position = position;
         this->size = size;
-        this->points = points;
         this->color =  color;
         this->collected = false;
     } 
 
     Vector2 getPosition() { return position; }
-
-    int getPoints() { return points; }
 
     bool isCollected() { return collected; } //getter
 
@@ -201,18 +208,17 @@ public:
         return collected;
     }
 
-    void dibujar() {
+    /*void dibujar() {
         if (!collected) {
             DrawCircleV({ position.x,position.y }, size.x, color);
         }
-    }
+    }*/
 };
 
 class GameManager {
 private:
     Player* player;
     Enemy* enemy;
-    Item* arrayItems[30];
     int totalPoints;
     int totalTime;
 public:
@@ -223,11 +229,8 @@ public:
         this->totalTime = 0;
     }
 
-    void acuPoints(Item& item) {
-        bool colisiono = item.checkCollision(player->GetRect());
-        if (colisiono) {
-            totalPoints += item.getPoints();
-        }
+    void acuPoints() {
+        totalPoints += 35;
     }
 
     int getTotalPoints() { return totalPoints; }
@@ -268,7 +271,7 @@ bool buscarRecursividad(int datoBuscar, nodo lista) {
     return false;
 }
 
-void printArray2D(Player& player, Item& item, Enemy& enemy) {
+void printArray2D(Player& player, Enemy& enemy, GameManager& gameManager) {
     isCollidingWall = false;
     for (int y = 0; y < filas; y++) {
         for (int x = 0; x < columnas; x++) {
@@ -280,9 +283,18 @@ void printArray2D(Player& player, Item& item, Enemy& enemy) {
                 DrawRectangleLinesEx(block, 5, BLUE);
                 player.checkWallCollision(block);
             }
+            if (maze[y][x] == 2) {
+                DrawCircleV({ x * blockSize + blockSize/2, y * blockSize + blockSize/2 }, 2.0f, WHITE);
+                int celdaX = (player.getPosition().x + player.getSize().x / 2) / blockSize;
+                int celdaY = (player.getPosition().y + player.getSize().y / 2) / blockSize;
+
+                if (celdaX == x && celdaY == y) {
+                    maze[y][x] = 0;
+                    gameManager.acuPoints();
+                }
+            }
         }
     }
-    item.dibujar();
 
     isCollidingEnemy = CheckCollisionRecs(player.GetRect(), enemy.GetRect());
     if (isCollidingEnemy)
@@ -291,11 +303,12 @@ void printArray2D(Player& player, Item& item, Enemy& enemy) {
 
 
 int main() {
+    inicializarComida();
+
     nodo lista = NULL;
 
     Player p1({ 130, 370 }, { 20, 20 }, 200.0f);
     Enemy  e1({ 40,  40 }, { 20, 20 }, 100.0f, ORANGE);
-    Item cookie({ 50,370 }, { 10,10 }, 35, WHITE);
     
     GameManager gm(&p1, &e1);
 
@@ -310,11 +323,8 @@ int main() {
 
         p1.movimiento();
         e1.moverAutomatico(p1.getPosition());
-        cookie.checkCollision(p1.GetRect());
 
-        gm.acuPoints(cookie);
-
-        printArray2D(p1, cookie, e1);
+        printArray2D(p1, e1, gm);
 
         DrawText(("Points: " + to_string(gm.getTotalPoints())).c_str(), 10, 800, 20 ,RED);
 
