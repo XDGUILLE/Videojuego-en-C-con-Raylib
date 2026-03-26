@@ -2,7 +2,15 @@
 #include <raylib.h>
 #include <string>
 
+
 using namespace std;
+
+Color backgroundColor = { 20, 16, 75, 255 };
+int windowWidth = 560;
+int windowHeight = 850;
+
+float blockSize = 20;
+Rectangle block{ 0, 0, blockSize, blockSize };
 
 const int filas = 37;
 const int columnas = 28;
@@ -46,25 +54,21 @@ int maze[filas][columnas] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
 
-void inicializarComida() {
+int inicializarComida() {
+    int contador = 0;
     for (int y = 0; y < filas; y++) {
         for (int x = 0; x < columnas; x++) {
             if (maze[y][x] == 0) {
                 maze[y][x] = 2;
+                contador++;
             }
         }
     }
+    return contador;
 }
 
-float blockSize = 20;
-Rectangle block{ 0, 0, blockSize, blockSize };
 bool isCollidingWall = false;
 bool isCollidingEnemy = false;
-bool isCollindingWallEnemy = false;
-
-Color backgroundColor = { 20, 16, 75, 255 };
-int windowWidth = 560;
-int windowHeight = 850;
 
 class Player {
 protected:
@@ -179,61 +183,54 @@ public:
     }
 };
 
-class Item {
-private:
-    Vector2 position;
-    Vector2 size;
-    Color color;
-    bool collected;
-public:
-    Item(Vector2 position, Vector2 size, Color color) {
-        this->position = position;
-        this->size = size;
-        this->color =  color;
-        this->collected = false;
-    } 
-
-    Vector2 getPosition() { return position; }
-
-    bool isCollected() { return collected; } //getter
-
-    Rectangle GetRect() { 
-        return Rectangle{ position.x,position.y,size.x,size.y }; 
-    }
-
-    bool checkCollision(Rectangle playerRect) {
-        if (CheckCollisionRecs(playerRect, GetRect())) {
-            collected = true;
-        }
-        return collected;
-    }
-
-    /*void dibujar() {
-        if (!collected) {
-            DrawCircleV({ position.x,position.y }, size.x, color);
-        }
-    }*/
-};
-
 class GameManager {
 private:
     Player* player;
     Enemy* enemy;
     int totalPoints;
-    int totalTime;
+    float totalTime;
+    bool gameOver;
+    int totalCookies;
+    int points;
 public:
     GameManager(Player* player, Enemy* enemy) {
         this->player = player;
         this->enemy = enemy;
         this->totalPoints = 0;
-        this->totalTime = 0;
+        this->totalTime = 0.0f;
+        this->gameOver = false;
+        this->totalCookies = 0;
+        this->points = 35;
     }
 
     void acuPoints() {
-        totalPoints += 35;
+        totalPoints += points;
     }
 
     int getTotalPoints() { return totalPoints; }
+
+    void actualizarTiempo() {
+        totalTime += GetFrameTime();
+    }
+
+    float getTotalTime() { return totalTime; }
+
+    void setGameOver() { gameOver = true; }
+
+    bool getGameOver() { return gameOver; }
+
+    void setTotalCookies(int cookies){
+        totalCookies += cookies;
+    }
+
+    bool isVictory() {
+        if (totalPoints == (totalCookies * points)) { //O algun puntaje a eleccion
+            return true;
+        }
+        return false;
+    }
+
+    int getTotalCookies() { return totalCookies; }
 };
 
 //Estructura lista
@@ -298,12 +295,13 @@ void printArray2D(Player& player, Enemy& enemy, GameManager& gameManager) {
 
     isCollidingEnemy = CheckCollisionRecs(player.GetRect(), enemy.GetRect());
     if (isCollidingEnemy)
-        DrawText("GameOver", 200, 360, 25, ORANGE);
+        gameManager.setGameOver();
 }
 
 
 int main() {
-    inicializarComida();
+    //Declaraciones
+    int totalCookies = inicializarComida();
 
     nodo lista = NULL;
 
@@ -311,6 +309,7 @@ int main() {
     Enemy  e1({ 40,  40 }, { 20, 20 }, 100.0f, ORANGE);
     
     GameManager gm(&p1, &e1);
+    gm.setTotalCookies(totalCookies);
 
     insertar(&e1, lista);
 
@@ -321,18 +320,35 @@ int main() {
         BeginDrawing();
         ClearBackground(backgroundColor);
 
-        p1.movimiento();
-        e1.moverAutomatico(p1.getPosition());
+        if (!gm.getGameOver() && !gm.isVictory()) {
+            //Logica de la partida
+            p1.movimiento();
+            //5e1.moverAutomatico(p1.getPosition());
 
-        printArray2D(p1, e1, gm);
+            printArray2D(p1, e1, gm);
 
-        DrawText(("Points: " + to_string(gm.getTotalPoints())).c_str(), 10, 800, 20 ,RED);
+            DrawText(("Points: " + to_string(gm.getTotalPoints())).c_str(), 10, 800, 20 ,RED);
+        
+            gm.actualizarTiempo();
+            char tiempoTexto[20];
+            snprintf(tiempoTexto, sizeof(tiempoTexto), "Time: %.2f", gm.getTotalTime());
+            DrawText(tiempoTexto, 10, 775, 20, RED);
 
-        p1.dibujar();
-        e1.dibujar();
+            p1.dibujar();
+            e1.dibujar();
 
-        p1.DrawHitbox(isCollidingWall);
-        e1.DrawHitbox(isCollidingEnemy);
+            p1.DrawHitbox(isCollidingWall);
+            e1.DrawHitbox(isCollidingEnemy);
+
+        }
+        else if (gm.isVictory()) {
+            DrawText("YOU WIN!", 170, 350, 40, GREEN);
+            DrawText(("Points: " + to_string(gm.getTotalPoints())).c_str(), 180, 400, 20, WHITE);
+        }
+        else {
+            DrawText("GAME OVER", 150, 350, 40, RED);
+            DrawText(("Points: " + to_string(gm.getTotalPoints())).c_str(), 180, 400, 20, WHITE);
+        }
         EndDrawing();
     }
 
