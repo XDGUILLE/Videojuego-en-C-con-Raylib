@@ -1,6 +1,8 @@
 #include <iostream>
 #include <raylib.h>
 #include <string>
+#include <vector>
+#include <queue>
 
 
 using namespace std;
@@ -67,7 +69,45 @@ int inicializarComida() {
     return contador;
 }
 
-bool isCollidingWall = false;
+class Node {
+public:
+    int x, y;
+    float g, h, f;
+    bool esPared;
+    bool enCerrada;
+    Node* padre;
+
+    Node() {
+        x = 0; y = 0;
+        g = 0.0f; h = 0.0f; f = 0.0f;
+        esPared = false;
+        enCerrada = false;
+        padre = nullptr;
+    }
+
+    void reset() {
+        g = 0.0f; h = 0.0f; f = 0.0f;
+        enCerrada = false;
+        padre = nullptr;
+    }
+};
+
+Node grid[filas][columnas];
+
+void inicializarGrid() {
+    for (int y = 0; y < filas; y++) {
+        for (int x = 0; x < columnas; x++) {
+            grid[y][x].x = x;
+            grid[y][x].y = y;
+            grid[y][x].esPared = (maze[y][x] == 1);
+        }
+    }
+}
+
+vector<Node*> encontrarCamino(int startX, int startY, int endX, int endY) {
+    
+}
+
 bool isCollidingEnemy = false;
 
 class Player {
@@ -76,7 +116,7 @@ protected:
     Vector2 oldPosition;
     Vector2 size;
     float speed;
-
+    bool isCollidingWall = false;
 public:
     Player(Vector2 position, Vector2 size, float speed) {
         this->position = position;
@@ -132,6 +172,12 @@ public:
             }
         }
     }
+
+    bool getIsCollidingWall() { return isCollidingWall; }
+
+    void resetCollision() {
+        isCollidingWall = false;
+    }
 };
 
 class Enemy : public Player {
@@ -159,7 +205,7 @@ public:
         float deltaTime = GetFrameTime();
         timer += deltaTime;
 
-        if (timer > 0.3f) {
+        if (isCollidingWall && timer > 0.3f) {
             moverEnX = !moverEnX;
             timer = 0.0f;
         }
@@ -269,16 +315,18 @@ bool buscarRecursividad(int datoBuscar, nodo lista) {
 }
 
 void printArray2D(Player& player, Enemy& enemy, GameManager& gameManager) {
-    isCollidingWall = false;
+    player.resetCollision();
+    enemy.resetCollision();
     for (int y = 0; y < filas; y++) {
         for (int x = 0; x < columnas; x++) {
-            if (maze[y][x] == 1) {
+            if (maze[y][x] == 1) {   
                 block.x = x * blockSize;
                 block.y = y * blockSize;
 
                 DrawRectangleRec(block, RED);
                 DrawRectangleLinesEx(block, 5, BLUE);
                 player.checkWallCollision(block);
+                enemy.checkWallCollision(block);
             }
             if (maze[y][x] == 2) {
                 DrawCircleV({ x * blockSize + blockSize/2, y * blockSize + blockSize/2 }, 2.0f, WHITE);
@@ -302,6 +350,7 @@ void printArray2D(Player& player, Enemy& enemy, GameManager& gameManager) {
 int main() {
     //Declaraciones
     int totalCookies = inicializarComida();
+    inicializarGrid();
 
     nodo lista = NULL;
 
@@ -323,7 +372,7 @@ int main() {
         if (!gm.getGameOver() && !gm.isVictory()) {
             //Logica de la partida
             p1.movimiento();
-            //5e1.moverAutomatico(p1.getPosition());
+            e1.moverAutomatico(p1.getPosition());
 
             printArray2D(p1, e1, gm);
 
@@ -337,8 +386,8 @@ int main() {
             p1.dibujar();
             e1.dibujar();
 
-            p1.DrawHitbox(isCollidingWall);
-            e1.DrawHitbox(isCollidingEnemy);
+            p1.DrawHitbox(p1.getIsCollidingWall());
+            e1.DrawHitbox(e1.getIsCollidingWall());
 
         }
         else if (gm.isVictory()) {
