@@ -56,18 +56,6 @@ int maze[filas][columnas] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
 
-int inicializarComida() {
-    int contador = 0;
-    for (int y = 0; y < filas; y++) {
-        for (int x = 0; x < columnas; x++) {
-            if (maze[y][x] == 0) {
-                maze[y][x] = 2;
-                contador++;
-            }
-        }
-    }
-    return contador;
-}
 
 class Node {
 public:
@@ -75,6 +63,7 @@ public:
     float g, h, f;
     bool esPared;
     bool enCerrada;
+    bool enAbierta;
     Node* padre;
 
     Node() {
@@ -82,12 +71,14 @@ public:
         g = 0.0f; h = 0.0f; f = 0.0f;
         esPared = false;
         enCerrada = false;
+        enAbierta = false;
         padre = nullptr;
     }
 
     void reset() {
         g = 0.0f; h = 0.0f; f = 0.0f;
         enCerrada = false;
+        enAbierta = false;
         padre = nullptr;
     }
 };
@@ -104,9 +95,111 @@ void inicializarGrid() {
     }
 }
 
-vector<Node*> encontrarCamino(int startX, int startY, int endX, int endY) {
-    
+int inicializarComida() {
+    int contador = 0;
+    for (int y = 0; y < filas; y++) {
+        for (int x = 0; x < columnas; x++) {
+            if (maze[y][x] == 0) {
+                maze[y][x] = 2;
+                contador++;
+            }
+        }
+    }
+    return contador;
 }
+
+
+struct CompararNodo {
+    bool operator()(Node* a, Node* b) {
+        return a->f > b->f;
+    }
+};
+
+vector<Node*> encontrarCamino(int startPx, int startPy, int endPx, int endPy) {
+    int startX = startPx / blockSize;
+    int startY = startPy / blockSize;
+    int endX = endPx / blockSize;
+    int endY = endPy / blockSize;
+
+    startX = max(0, min(startX, columnas - 1));
+    startY = max(0, min(startY, filas - 1));
+    endX = max(0, min(endX, columnas - 1));
+    endY = max(0, min(endY, filas - 1));
+
+    if (grid[startY][startX].esPared) {
+        for (int r = 1; r < 5; r++) {
+            bool found = false;
+            for (int dy2 = -r; dy2 <= r && !found; dy2++) {
+                for (int dx2 = -r; dx2 <= r && !found; dx2++) {
+                    int ny = startY + dy2;
+                    int nx = startX + dx2;
+                    if (ny >= 0 && ny < filas && nx >= 0 && nx < columnas
+                        && !grid[ny][nx].esPared) {
+                        startX = nx; startY = ny;
+                        found = true;
+                    }
+                }
+            }
+            if (found) break;
+        }
+    }
+
+    for (int y = 0; y < filas; y++)
+        for (int x = 0; x < columnas; x++)
+            grid[y][x].reset();
+
+    grid[startY][startX].g = 0;
+    grid[startY][startX].h = abs(endX - startX) + abs(endY - startY);
+    grid[startY][startX].f = grid[startY][startX].h;
+
+    priority_queue<Node*, vector<Node*>, CompararNodo> abiertos;
+    abiertos.push(&grid[startY][startX]);
+
+    int dx[] = { 0,  0, 1, -1 };
+    int dy[] = { 1, -1, 0,  0 };
+
+    while (!abiertos.empty()) {
+        Node* actual = abiertos.top();
+        abiertos.pop();
+
+        if (actual->x == endX && actual->y == endY) {
+            vector<Node*> camino;
+            Node* nodo = actual;
+            while (nodo != nullptr) {
+                camino.push_back(nodo);
+                nodo = nodo->padre;
+            }
+            reverse(camino.begin(), camino.end());
+            return camino;
+        }
+
+        actual->enCerrada = true;
+
+        for (int i = 0; i < 4; i++) {
+            int nx = actual->x + dx[i];
+            int ny = actual->y + dy[i];
+
+            if (nx < 0 || ny < 0 || nx >= columnas || ny >= filas) continue;
+            if (grid[ny][nx].esPared) continue;
+            if (grid[ny][nx].enCerrada) continue;
+        
+            float nuevoG = actual->g + 1;
+            float h = abs(endX - nx) + abs(endY - ny);
+            float f = nuevoG + h;
+
+            if (!grid[ny][nx].enAbierta || nuevoG < grid[ny][nx].g) {
+                grid[ny][nx].g = nuevoG;
+                grid[ny][nx].h = h;
+                grid[ny][nx].f = f;
+                grid[ny][nx].padre = actual;
+                grid[ny][nx].enAbierta = true;
+                abiertos.push(&grid[ny][nx]);
+            }
+        }
+    }
+    return {};
+}
+
 
 bool isCollidingEnemy = false;
 
@@ -185,7 +278,9 @@ private:
     Color color;
     float timer = 0.0f;
     bool  moverEnX = true;
-
+    vector<Node*> camino;
+    int indiceCamino = 0;
+    Vector2 ultimaPosPlayer = { 40.0f, 40.0f };  
 public:
     Enemy(Vector2 position, Vector2 size, float speed, Color color)
         : Player(position, size, speed) {
@@ -203,29 +298,35 @@ public:
     void moverAutomatico(Vector2 playerPos) {
         oldPosition = position;
         float deltaTime = GetFrameTime();
-        timer += deltaTime;
 
-        if (isCollidingWall && timer > 0.3f) {
-            moverEnX = !moverEnX;
-            timer = 0.0f;
+        int celdaPlayerX = playerPos.x / blockSize;
+        int celdaPlayerY = playerPos.y / blockSize;
+        int ultimaX = ultimaPosPlayer.x / blockSize;
+        int ultimaY = ultimaPosPlayer.y / blockSize;
+
+        if (celdaPlayerX != ultimaX || celdaPlayerY != ultimaY || camino.empty() || indiceCamino >= (int)camino.size()) {
+            camino = encontrarCamino(
+                (int)(position.x / blockSize) * blockSize,
+                (int)(position.y / blockSize) * blockSize,
+                playerPos.x, playerPos.y
+            );
+            indiceCamino = 1;
+            ultimaPosPlayer = playerPos;
         }
 
-        if (moverEnX) {
-            if (playerPos.x > position.x) position.x += speed * deltaTime;
-            if (playerPos.x < position.x) position.x -= speed * deltaTime;
-        }
-        else {
-            if (playerPos.y > position.y) position.y += speed * deltaTime;
-            if (playerPos.y < position.y) position.y -= speed * deltaTime;
-        }
+        if (!camino.empty() && indiceCamino < (int)camino.size()) {
+            float targetX = camino[indiceCamino]->x * blockSize;
+            float targetY = camino[indiceCamino]->y * blockSize;
 
-        windowWidth = GetScreenWidth();
-        windowHeight = GetScreenHeight();
+            float dx = targetX - position.x;
+            float dy = targetY - position.y;
 
-        if (position.x - size.x < 0)           position.x = size.x;
-        if (position.x + size.x > windowWidth)  position.x = windowWidth - size.x;
-        if (position.y - size.y < 0)            position.y = size.y;
-        if (position.y + size.y > windowHeight) position.y = windowHeight - size.y;
+            if (abs(dx) > 1.0f) position.x += (dx > 0 ? 1.0f : -1.0f) * speed * deltaTime;
+            if (abs(dy) > 1.0f) position.y += (dy > 0 ? 1.0f : -1.0f) * speed * deltaTime;
+
+            if (abs(dx) < 2.0f && abs(dy) < 2.0f)
+                indiceCamino++;
+        }
     }
 };
 
@@ -279,15 +380,19 @@ public:
     int getTotalCookies() { return totalCookies; }
 };
 
-//Estructura lista
+//Estructura lista elazada simple
 struct estructuraNodo {
-    Player* valor;
+    Enemy* valor;
+    float distancia;
     estructuraNodo* siguiente;
 };
 
 typedef estructuraNodo* nodo;
 
 void insertar(Enemy* npcInsertar, nodo& lista) {
+
+    distancia = sqrt(pow(ex - px, 2) + pow(ey - py, 2));
+
     if (lista == NULL) {
         nodo nuevo = new estructuraNodo();
         nuevo->valor = npcInsertar;
@@ -326,7 +431,7 @@ void printArray2D(Player& player, Enemy& enemy, GameManager& gameManager) {
                 DrawRectangleRec(block, RED);
                 DrawRectangleLinesEx(block, 5, BLUE);
                 player.checkWallCollision(block);
-                enemy.checkWallCollision(block);
+                //enemy.checkWallCollision(block);
             }
             if (maze[y][x] == 2) {
                 DrawCircleV({ x * blockSize + blockSize/2, y * blockSize + blockSize/2 }, 2.0f, WHITE);
@@ -398,6 +503,7 @@ int main() {
             DrawText("GAME OVER", 150, 350, 40, RED);
             DrawText(("Points: " + to_string(gm.getTotalPoints())).c_str(), 180, 400, 20, WHITE);
         }
+
         EndDrawing();
     }
 

@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\debra\\Documents\\Proyectos VSCode\\Videojuego Con Raylib\\",
+  "WorkspaceRootPath": "C:\\Users\\debra\\Documentos\\GUILLERMO PC\\Videojuego-en-C-con-Raylib\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{AF01BEFF-D456-4802-AB1B-EB50ECA6B0BF}|Videojuego Con Raylib\\Videojuego Con Raylib.vcxproj|C:\\Users\\debra\\Documents\\Proyectos VSCode\\Videojuego Con Raylib\\Videojuego Con Raylib\\Videojuego Con Raylib.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{AF01BEFF-D456-4802-AB1B-EB50ECA6B0BF}|Videojuego Con Raylib\\Videojuego Con Raylib.vcxproj|C:\\Users\\debra\\Documentos\\GUILLERMO PC\\Videojuego-en-C-con-Raylib\\Videojuego Con Raylib\\Videojuego Con Raylib.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{AF01BEFF-D456-4802-AB1B-EB50ECA6B0BF}|Videojuego Con Raylib\\Videojuego Con Raylib.vcxproj|solutionrelative:Videojuego Con Raylib\\Videojuego Con Raylib.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -20,11 +20,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Videojuego Con Raylib.cpp",
-              "DocumentMoniker": "C:\\Users\\debra\\Documents\\Proyectos VSCode\\Videojuego Con Raylib\\Videojuego Con Raylib\\Videojuego Con Raylib.cpp",
+              "DocumentMoniker": "C:\\Users\\debra\\Documentos\\GUILLERMO PC\\Videojuego-en-C-con-Raylib\\Videojuego Con Raylib\\Videojuego Con Raylib.cpp",
               "RelativeDocumentMoniker": "Videojuego Con Raylib\\Videojuego Con Raylib.cpp",
-              "ToolTip": "C:\\Users\\debra\\Documents\\Proyectos VSCode\\Videojuego Con Raylib\\Videojuego Con Raylib\\Videojuego Con Raylib.cpp",
+              "ToolTip": "C:\\Users\\debra\\Documentos\\GUILLERMO PC\\Videojuego-en-C-con-Raylib\\Videojuego Con Raylib\\Videojuego Con Raylib.cpp",
               "RelativeToolTip": "Videojuego Con Raylib\\Videojuego Con Raylib.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAH8BAAAAAAAAAAAAAJABAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-02-26T17:13:14.921Z",
               "EditorCaption": ""
