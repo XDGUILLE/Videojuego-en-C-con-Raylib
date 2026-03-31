@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <cmath>
 
 
 using namespace std;
@@ -389,18 +390,40 @@ struct estructuraNodo {
 
 typedef estructuraNodo* nodo;
 
-void insertar(Enemy* npcInsertar, nodo& lista) {
+void insertar(Enemy* enemy, Player* player, nodo& lista) {
 
-    distancia = sqrt(pow(ex - px, 2) + pow(ey - py, 2));
+	float ex = enemy->getPosition().x;
+	float ey = enemy->getPosition().y;
+	float px = player->getPosition().x;
+	float py = player->getPosition().y;
+    lista->distancia = sqrt(pow((ex - px), 2) + pow((ey - py), 2));
+
+    nodo nuevo = new estructuraNodo();
+    nuevo->valor = enemy;
+    nuevo->distancia = nuevo->distancia;
+	nuevo->siguiente = NULL;
 
     if (lista == NULL) {
-        nodo nuevo = new estructuraNodo();
-        nuevo->valor = npcInsertar;
         nuevo->siguiente = NULL;
         lista = nuevo;
     }
-    else {
-        insertar(npcInsertar, lista->siguiente);
+    else{
+        nodo actual = lista;
+        while (actual->siguiente != NULL && actual->siguiente->distancia < nuevo->distancia) {
+            actual = actual->siguiente;
+        }
+        nuevo->siguiente = actual->siguiente;
+        actual->siguiente = nuevo;
+
+        insertar(enemy, player, lista->siguiente);
+    }
+}
+
+void limpiarLista(nodo& lista) {
+    while (lista != NULL) {
+        nodo temp = lista;
+        lista = lista->siguiente;
+        delete temp;
     }
 }
 
@@ -460,12 +483,13 @@ int main() {
     nodo lista = NULL;
 
     Player p1({ 130, 370 }, { 20, 20 }, 200.0f);
-    Enemy  e1({ 40,  40 }, { 20, 20 }, 100.0f, ORANGE);
+    Enemy e1({ 40,  40 }, { 20, 20 }, 100.0f, ORANGE);
+    Enemy e2({ 480, 40 }, { 20, 20 }, 100.0f, RED);
+    Enemy e3({ 40,  680 }, { 20, 20 }, 100.0f, PINK);
+    Enemy e4({ 480, 680 }, { 20, 20 }, 100.0f, SKYBLUE);
     
     GameManager gm(&p1, &e1);
     gm.setTotalCookies(totalCookies);
-
-    insertar(&e1, lista);
 
     InitWindow(windowWidth, windowHeight, "MazeRunner");
     SetTargetFPS(60);
@@ -473,6 +497,12 @@ int main() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(backgroundColor);
+
+        limpiarLista(lista);
+        insertar(&e1, &p1, lista);
+        insertar(&e2, &p1, lista);
+        insertar(&e3, &p1, lista);
+        insertar(&e4, &p1, lista);
 
         if (!gm.getGameOver() && !gm.isVictory()) {
             //Logica de la partida
